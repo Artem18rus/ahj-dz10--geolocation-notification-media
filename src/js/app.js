@@ -40,11 +40,7 @@ class InnTimelineWidget {
       },
 
       (err) => { // выполняется если геолокация неактивна
-
-
-        
         timeline.bindToDOM();
-
 
         input.style.background = '#f1090921';
         input.readOnly = true;
