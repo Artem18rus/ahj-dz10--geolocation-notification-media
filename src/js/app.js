@@ -1,8 +1,9 @@
-import inputModalWidget from './widget';
+/* eslint-disable no-unused-vars */
+
+import InputModalWidget from './widget';
 
 const container = document.querySelector('.container');
-const timeline = new inputModalWidget(container);
-
+const timeline = new InputModalWidget(container);
 
 const input = document.querySelector('.input');
 const records = document.querySelector('.records');
@@ -48,18 +49,21 @@ class InnTimelineWidget {
         modal.style.display = 'block'; // появление модального окна
 
         const btnCancel = document.querySelector('.btn-cancel');
-        btnCancel.addEventListener('click', (e) => { // выполняется при клике на кнопку "Отмена" модального кона
+        btnCancel.addEventListener('click', () => { // выполняется при клике на кнопку "Отмена" модального кона
           modal.style.display = 'none';
           input.placeholder = 'Включите геолокацию и обновите страницу!';
         });
 
         const inputModal = document.querySelector('.input-modal');
         const arrGeo = [];
+
         modal.addEventListener('submit', (e) => { // обработка кнопки "Ок" модального окна
           e.preventDefault();
           modal.style.display = 'none';
           input.style.background = 'none';
           input.readOnly = false;
+
+          inputModal.value = inputModal.value.replace(/[^0-9,.-]/g, ' ');
           arrGeo.push(inputModal.value);
         });
 
