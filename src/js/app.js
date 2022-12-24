@@ -3,94 +3,112 @@ const input = document.querySelector('.input');
 const records = document.querySelector('.records');
 
 class InnTimelineWidget {
-  static geolocation() {
+  constructor() {
+    this.input = input;
+    this.records = records;
+
+    this.onSubmitPost = this.onSubmitPost.bind(this);
+    this.btnModalOkClick = this.btnModalOkClick.bind(this);
+    this.onSubmitPostAfterModal = this.onSubmitPostAfterModal.bind(this);
+    this.arrGeo = null;
+  }
+
+  geolocation() {
     navigator.geolocation.getCurrentPosition(
       (data) => { // выполняется если включена геолокация
-        const { latitude, longitude } = data.coords;
-        input.addEventListener('keydown', (e) => { // обработка по нажатию на Enter в инпуте добавления поста
-          if (e.keyCode === 13 && input.value.length > 2) {
-            const recordsItem = document.querySelectorAll('.records-item');
-            if (recordsItem.length === 0) {
-              records.insertAdjacentHTML('afterBegin', `
-            <li class="records-item">
-              <div class="line1">
-                <div class="records-item-content">${input.value}</div>
-              <div class="records-item-time">${new Date().toLocaleString().slice(0, -3)}</div>
-              </div>
-              <div class="geolocation">${`${latitude}, -${longitude}`}</div>
-            </li>`);
-            } else {
-              records.insertAdjacentHTML('afterBegin', `
-            <li class="records-item">
-              <div class="line1">
-                <div class="records-item-content">${input.value}</div>
-                <div class="records-item-time">${new Date().toLocaleString().slice(0, -3)}</div>
-              </div>
-              <div class="geolocation">${`${latitude}, -${longitude}`}</div>
-            </li>`);
-            }
-            input.value = '';
-          }
-        });
+        this.latitude = data.coords.latitude;
+        this.longitude = data.coords.longitude;
+        this.input.addEventListener('keydown', this.onSubmitPost); // обработка по нажатию на Enter в инпуте добавления поста
       },
 
       (err) => { // выполняется если геолокация неактивна
-        input.style.background = '#f1090921';
-        input.readOnly = true;
-        const modal = document.querySelector('.modal');
-        modal.style.display = 'block'; // появление модального окна
+        this.input.style.background = '#f1090921';
+        this.input.readOnly = true;
+        this.modal = document.querySelector('.modal');
+        this.modal.style.display = 'block'; // появление модального окна
 
-        const btnCancel = document.querySelector('.btn-cancel');
-        btnCancel.addEventListener('click', () => { // выполняется при клике на кнопку "Отмена" модального кона
-          modal.style.display = 'none';
-          input.placeholder = 'Включите геолокацию и обновите страницу!';
-        });
-
-        const inputModal = document.querySelector('.input-modal');
-        const arrGeo = [];
-        modal.addEventListener('submit', (e) => { // обработка кнопки "Ок" модального окна
-          e.preventDefault();
-          modal.style.display = 'none';
-          input.style.background = 'none';
-          input.readOnly = false;
-
-          inputModal.value = inputModal.value.replace(/[^0-9,.-]/g, ' ');
-          inputModal.value = inputModal.value.replace(/\s{2,}/g, ' ').replace(/([,]+)(?=\S)/g, '$1 ');
-          arrGeo.push(inputModal.value);
-        });
-
-        input.addEventListener('keydown', (e) => { // выполняется после нажатия на Enter в инпуте добалвения поста после нажатия кнопки "Ок" модального окна
-          if (e.keyCode === 13 && input.value.length > 2) {
-            const recordsItem = document.querySelectorAll('.records-item');
-            if (recordsItem.length === 0) {
-              records.insertAdjacentHTML('afterBegin', `
-              <li class="records-item">
-                <div class="line1">
-                  <div class="records-item-content">${input.value}</div>
-                  <div class="records-item-time">${new Date().toLocaleString().slice(0, -3)}</div>
-                </div>
-                <div class="geolocation">${arrGeo}</div>
-              </li>`);
-            } else {
-              records.insertAdjacentHTML('afterBegin', `
-              <li class="records-item">
-                <div class="line1">
-                  <div class="records-item-content">${input.value}</div>
-                  <div class="records-item-time">${new Date().toLocaleString().slice(0, -3)}</div>
-                </div>
-                <div class="geolocation">${arrGeo[arrGeo.length - 1]}</div>
-              </li>`);
-            }
-            input.value = '';
-          }
-        });
+        this.btnModalCancelClick(); // выполняется при клике на кнопку "Отмена" модального кона
+        this.btnModalOkClick(); // обработка кнопки "Ок" модального окна
+        this.input.addEventListener('keydown', this.onSubmitPostAfterModal); // выполняется после нажатия на Enter в инпуте добалвения поста после нажатия кнопки "Ок" модального окна
       },
+
       { enableHighAccuracy: true },
     );
   }
+
+  onSubmitPost(e) {
+    this.recordsItem = document.querySelectorAll('.records-item');
+    if (e.keyCode === 13 && this.recordsItem.length === 0 && this.input.value.length > 2) {
+      records.insertAdjacentHTML('afterBegin', `
+          <li class="records-item">
+            <div class="line1">
+              <div class="records-item-content">${this.input.value}</div>
+            <div class="records-item-time">${new Date().toLocaleString().slice(0, -3)}</div>
+            </div>
+            <div class="geolocation">${`${this.latitude}, -${this.longitude}`}</div>
+          </li>`);
+      this.input.value = '';
+    } else if (e.keyCode === 13 && this.recordsItem.length !== 0 && this.input.value.length > 2) {
+      records.insertAdjacentHTML('afterBegin', `
+          <li class="records-item">
+            <div class="line1">
+              <div class="records-item-content">${this.input.value}</div>
+              <div class="records-item-time">${new Date().toLocaleString().slice(0, -3)}</div>
+            </div>
+            <div class="geolocation">${`${this.latitude}, -${this.longitude}`}</div>
+          </li>`);
+      this.input.value = '';
+    }
+  }
+
+  btnModalCancelClick() {
+    this.btnCancel = document.querySelector('.btn-cancel');
+    this.btnCancel.addEventListener('click', () => {
+      this.modal.style.display = 'none';
+      this.input.placeholder = 'Включите геолокацию и обновите страницу!';
+    });
+  }
+
+  btnModalOkClick() {
+    this.inputModal = document.querySelector('.input-modal');
+    this.arrGeo = [];
+    this.modal.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.modal.style.display = 'none';
+      this.input.style.background = 'none';
+      this.input.readOnly = false;
+
+      this.inputModal.value = this.inputModal.value.replace(/[^0-9,.-]/g, ' ');
+      this.inputModal.value = this.inputModal.value.replace(/\s{2,}/g, ' ').replace(/([,]+)(?=\S)/g, '$1 ');
+      this.arrGeo.push(this.inputModal.value);
+    });
+  }
+
+  onSubmitPostAfterModal(e) {
+    this.recordsItem = document.querySelectorAll('.records-item');
+    if (e.keyCode === 13 && this.recordsItem.length === 0 && this.input.value.length > 2) {
+      this.records.insertAdjacentHTML('afterBegin', `
+          <li class="records-item">
+            <div class="line1">
+              <div class="records-item-content">${this.input.value}</div>
+              <div class="records-item-time">${new Date().toLocaleString().slice(0, -3)}</div>
+            </div>
+            <div class="geolocation">${this.arrGeo}</div>
+          </li>`);
+      this.input.value = '';
+    } else if (e.keyCode === 13 && this.recordsItem.length !== 0 && this.input.value.length > 2) {
+      this.records.insertAdjacentHTML('afterBegin', `
+          <li class="records-item">
+            <div class="line1">
+              <div class="records-item-content">${this.input.value}</div>
+              <div class="records-item-time">${new Date().toLocaleString().slice(0, -3)}</div>
+            </div>
+            <div class="geolocation">${this.arrGeo[this.arrGeo.length - 1]}</div>
+          </li>`);
+      this.input.value = '';
+    }
+  }
 }
 
-// const eks1 = new InnTimelineWidget();
-// eks1.geolocation();
-
-InnTimelineWidget.geolocation();
+const eksOne = new InnTimelineWidget();
+eksOne.geolocation();
