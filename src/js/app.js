@@ -1,10 +1,4 @@
 /* eslint-disable no-unused-vars */
-
-import InputModalWidget from './widget';
-
-const container = document.querySelector('.container');
-const timeline = new InputModalWidget(container);
-
 const input = document.querySelector('.input');
 const records = document.querySelector('.records');
 
@@ -41,8 +35,6 @@ class InnTimelineWidget {
       },
 
       (err) => { // выполняется если геолокация неактивна
-        timeline.bindToDOM();
-
         input.style.background = '#f1090921';
         input.readOnly = true;
         const modal = document.querySelector('.modal');
@@ -56,7 +48,6 @@ class InnTimelineWidget {
 
         const inputModal = document.querySelector('.input-modal');
         const arrGeo = [];
-
         modal.addEventListener('submit', (e) => { // обработка кнопки "Ок" модального окна
           e.preventDefault();
           modal.style.display = 'none';
@@ -64,6 +55,7 @@ class InnTimelineWidget {
           input.readOnly = false;
 
           inputModal.value = inputModal.value.replace(/[^0-9,.-]/g, ' ');
+          inputModal.value = inputModal.value.replace(/\s{2,}/g, ' ').replace(/([,]+)(?=\S)/g, '$1 ');
           arrGeo.push(inputModal.value);
         });
 
@@ -97,5 +89,8 @@ class InnTimelineWidget {
     );
   }
 }
+
+// const eks1 = new InnTimelineWidget();
+// eks1.geolocation();
 
 InnTimelineWidget.geolocation();
