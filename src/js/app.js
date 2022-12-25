@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+import isValidInn from './validators';
+
 const input = document.querySelector('.input');
 const records = document.querySelector('.records');
 
@@ -74,13 +76,16 @@ class InnTimelineWidget {
     this.arrGeo = [];
     this.modal.addEventListener('submit', (e) => {
       e.preventDefault();
-      this.modal.style.display = 'none';
-      this.input.style.background = 'none';
-      this.input.readOnly = false;
-
-      this.inputModal.value = this.inputModal.value.replace(/[^0-9,.-]/g, ' ');
-      this.inputModal.value = this.inputModal.value.replace(/\s{2,}/g, ' ').replace(/([,]+)(?=\S)/g, '$1 ');
-      this.arrGeo.push(this.inputModal.value);
+      if (isValidInn(this.inputModal.value)) {
+        this.modal.style.display = 'none';
+        this.input.style.background = 'none';
+        this.input.readOnly = false;
+        this.inputModal.value = this.inputModal.value.replace(/[^0-9,.-]/g, ' ');
+        this.inputModal.value = this.inputModal.value.replace(/\s{2,}/g, ' ').replace(/([,]+)(?=\S)/g, '$1 ');
+        this.arrGeo.push(this.inputModal.value);
+      } else {
+        this.modal.reportValidity();
+      }
     });
   }
 
